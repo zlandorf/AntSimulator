@@ -33,7 +33,12 @@ public class DebugRenderer {
 		Vector2 nestPos = world.getNest().getPosition();
 		
 		shapeRenderer.setProjectionMatrix(camera.combined);
+		
 		shapeRenderer.begin(ShapeType.Box);
+
+		shapeRenderer.setColor(Color.RED);
+		shapeRenderer.box( 1, 1, 0, world.getWidth() - 1, world.getHeight() - 1, 0);
+		
 		shapeRenderer.setColor(Color.RED);
 		
 		shapeRenderer.box(nestPos.x, nestPos.y, 0, 2, 2, 0);

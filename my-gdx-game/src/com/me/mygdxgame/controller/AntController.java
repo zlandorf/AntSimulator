@@ -1,5 +1,7 @@
 package com.me.mygdxgame.controller;
 
+import java.util.List;
+
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.me.mygdxgame.constants.AntSimulatorConstants;
@@ -8,22 +10,46 @@ import com.me.mygdxgame.model.FoodSource;
 import com.me.mygdxgame.model.World;
 import com.me.mygdxgame.util.Util;
 
-public class AntController {
+public class AntController implements AntListener {
 	
 	private Ant ant;
 	private World world;
 	
 	private Vector2 goal = null;
 	private Vector2 optimisedGoal = null;
+	private Vector2 tempVector = null;
 	
 	private int currentTick;
 	private int nextDirectionChangeTick;
+	private AntCommunicationBus communicationBus;
 	
-	public AntController(World world, Ant ant) {
+	public AntController(World world, Ant ant, AntCommunicationBus communicationBus) {
 		this.world = world;
 		this.ant = ant;
 		this.currentTick = 0;
 		this.nextDirectionChangeTick = 0;
+		this.tempVector = new Vector2();
+		this.communicationBus = communicationBus;
+		this.communicationBus.addListener(this);
+	}
+	
+	@Override
+	public void onAntMessage(Ant emitter, AntMessageType type) {
+		
+		if (emitter.getId() == ant.getId()) return;
+
+		float distance = emitter.getPosition().dst(ant.getPosition());
+		if (distance > AntSimulatorConstants.ANT_HEARING_DISTANCE) return;
+		
+		switch (type) {
+		case FOUND_FOOD :
+			if (ant.getState() == Ant.State.SEARCHING) {
+				foundFoodSoure(emitter.getCurrentFoodSource());
+			}
+			break;
+		default:
+			break;
+		}
 	}
 	
 	public void update(float delta) {
@@ -92,13 +118,25 @@ public class AntController {
 		setNewGoal(null);
 	}
 	
+	private void foundFoodSoure(FoodSource source) {
+		ant.setState(Ant.State.GOING_TO);
+		ant.setCurrentFoodSource(source);
+		setNewGoal(source.getPosition());
+	}
+	
 	//------------ GOAL FINDING METHODS
 	private void search() {
-		for (FoodSource source : world.getFoodSources()) {
-			if (ant.getPosition().dst(source.getPosition()) <= AntSimulatorConstants.FOOD_FIND_DISTANCE && source.getFoodLeft() > 0.0f) {
-				ant.setState(Ant.State.GOING_TO);
-				ant.setCurrentFoodSource(source);
-				setNewGoal(source.getPosition());
+		
+		List<FoodSource> sources = world.getFoodSources();
+		int nbSources = sources.size();
+		FoodSource source;
+		
+		//using indexation to avoid iterator instanciation
+		for (int i = 0; i < nbSources; i++) {
+			source = sources.get(i);
+			if (ant.getPosition().dst(source.getPosition()) <= AntSimulatorConstants.ANT_FOOD_FIND_DISTANCE && source.getFoodLeft() > 0.0f) {
+				foundFoodSoure(source);
+				communicationBus.notifyOthers(ant, AntMessageType.FOUND_FOOD);
 				return;
 			}	
 		}
@@ -137,9 +175,9 @@ public class AntController {
 				setNewGoal(null);
 			} else {
 
-				float foodHarvested = Math.min(AntSimulatorConstants.FOOD_HARVESTED_PER_TICK, foodLeftInSource);
+				float foodHarvested = Math.min(AntSimulatorConstants.ANT_FOOD_HARVESTED_PER_TICK, foodLeftInSource);
 				
-				if (foodCarried >= AntSimulatorConstants.MAX_FOOD_CARRIED) {
+				if (foodCarried >= AntSimulatorConstants.ANT_MAX_FOOD_CARRIED) {
 					setNewGoal(world.getNest().getPosition());
 					ant.setState(Ant.State.GOING_TO);
 					return;
@@ -184,17 +222,18 @@ public class AntController {
 
 		Vector2 closest;
 		if (distToGoal <= distToOptimisedGoal) {
-			closest = new Vector2(goal);
+			closest = goal;
 		} else {
-			closest = new Vector2(optimisedGoal);
+			closest = optimisedGoal;
 		}
+		float distanceToGoal = antPos.dst(closest); 
+		tempVector.set(closest.x, closest.y);
 		
 		//set ant direction
-		Vector2 dir = new Vector2(closest).sub(antPos);
+		Vector2 dir = tempVector.sub(antPos);
 		dir.nor();
 		ant.setDirection(dir);
 		
-		float distanceToGoal = antPos.dst(closest); 
 		if (distanceToGoal <= AntSimulatorConstants.ANT_SPEED) {
 			ant.setPosition(closest.x, closest.y);
 			onArrival(closest);
@@ -231,4 +270,5 @@ public class AntController {
 		ant.setGoal(goal);
 		findOptimisedGoal();
 	}
+
 }

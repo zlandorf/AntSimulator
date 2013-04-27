@@ -2,12 +2,13 @@ package com.me.mygdxgame.view;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Vector2;
 import com.me.mygdxgame.art.AntSimulatorArt;
 import com.me.mygdxgame.constants.AntSimulatorConstants;
@@ -19,13 +20,17 @@ public class WorldRenderer {
 
 	private World world;
 	private OrthographicCamera camera;
+	private OrthographicCamera fboCamera;
+	
+	private SpriteBatch fboBatch;
 	private SpriteBatch batch;
 	private SpriteBatch textBatch;
 	private BitmapFont font;
 	
 	private AntRenderer antRenderer = null;
 	private DebugRenderer debugRenderer = null;
-	private ShapeRenderer shapeRenderer = null;
+	private FrameBuffer fbo = null;
+	private TextureRegion fboRegion = null;
 	
 	private float width;
 	private float height;
@@ -59,37 +64,52 @@ public class WorldRenderer {
 		camera.position.y = world.getNest().getPosition().y;
 		camera.update();
 		
+		fboCamera = new OrthographicCamera(world.getWidth(), world.getHeight());
+		fboCamera.position.x = world.getWidth() / 2;
+		fboCamera.position.y = world.getHeight() / 2;
+		fboCamera.update();
+		
+		
 		batch = new SpriteBatch();
+		fboBatch = new SpriteBatch();
 		textBatch = new SpriteBatch();
 		
 		antRenderer = new AntRenderer();
-		debugRenderer = new DebugRenderer(world, camera);
-		shapeRenderer = new ShapeRenderer();
+		debugRenderer = new DebugRenderer(world, fboCamera);
 		
 		font = new BitmapFont();
 		font.setColor(Color.BLACK);
+		
+		fbo = new FrameBuffer(Format.RGB565, (int)world.getWidth(), (int) world.getHeight(), false);
+		fboRegion = new TextureRegion(fbo.getColorBufferTexture());
+		fboRegion.flip(false,  true);
 	}
 	
 	public void render(float delta) {
 		
-		shapeRenderer.setProjectionMatrix(camera.combined);
-		shapeRenderer.begin(ShapeType.Box);
-		shapeRenderer.setColor(Color.RED);
-		shapeRenderer.box(0, 0, 0, world.getWidth(), world.getHeight(), 0);
-		shapeRenderer.end();
-		
-		batch.setProjectionMatrix(camera.combined);
-		batch.begin();
-		
+		fboBatch.setProjectionMatrix(fboCamera.combined);
+
+		fbo.begin();
+		Gdx.gl.glClearColor(.95f, .867f, .699f, 1f);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		fboBatch.begin();
 		drawNest();
 		drawFood();
 		drawAnts();
-		
-		batch.end();
-		
+		fboBatch.end();
 		if (debug) {
 			debugRenderer.render(delta);
 		}
+		fbo.end();
+		
+		batch.setProjectionMatrix(camera.combined);
+		batch.begin();
+		batch.draw(fboRegion,0,0);
+		batch.draw(fboRegion,0,world.getHeight());
+		batch.end();
+		
+		
+		textBatch.begin();
 		
 		// draw overlay text
 		int nbAnts = world.getAnts().size();
@@ -97,7 +117,7 @@ public class WorldRenderer {
 		int fps    = currentFps;
 		
 		float currentHeight = height - 10;
-		textBatch.begin();
+		
 		font.draw(textBatch, "Nb Ants", 10, currentHeight);font.draw(textBatch, " : "+nbAnts, 60, currentHeight);
 		currentHeight -= font.getLineHeight() + 5;
 		font.draw(textBatch, "Food", 10, currentHeight);font.draw(textBatch, " : "+food, 60, currentHeight);
@@ -118,13 +138,13 @@ public class WorldRenderer {
 
 	private void drawAnts() {
 		for (Ant ant : world.getAnts()) {
-			antRenderer.render(batch, ant);
+			antRenderer.render(fboBatch, ant);
 		}
 	}
 
 	private void drawNest() {
 		Vector2 nestPos = world.getNest().getPosition();
-		batch.draw(AntSimulatorArt.nestTexture, 
+		fboBatch.draw(AntSimulatorArt.nestTexture, 
 				   nestPos.x - AntSimulatorArt.nestTexture.getRegionWidth() / 2,
 				   nestPos.y - AntSimulatorArt.nestTexture.getRegionHeight() / 2);
 	}
@@ -149,7 +169,7 @@ public class WorldRenderer {
 			}
 			
 			TextureRegion frame = AntSimulatorArt.foodSourceTexture[index]; 
-			batch.draw(frame,
+			fboBatch.draw(frame,
 					   foodPos.x - frame.getRegionWidth() / 2,
 					   foodPos.y - frame.getRegionHeight() / 2);
 		}

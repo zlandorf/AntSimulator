@@ -14,11 +14,13 @@ public class Controller {
 
 	private World world;
 	private List<AntController> antControllers;
+	private AntCommunicationBus communicationBus;
 	private float time;
 	
 	public Controller(World world) {
 		this.world = world;
 		antControllers = new ArrayList<AntController>();
+		communicationBus = new AntCommunicationBus();
 		populateAnts();
 		populateFood();
 		time = 0;
@@ -80,7 +82,7 @@ public class Controller {
 	
 	private void addAnt(Ant ant) {
 		world.addAnt(ant);
-		antControllers.add(new AntController(world, ant));
+		antControllers.add(new AntController(world, ant, communicationBus));
 	}
 	
 	public void spawnAntFromNest() {

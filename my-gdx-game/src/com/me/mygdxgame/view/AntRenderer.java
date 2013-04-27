@@ -36,7 +36,7 @@ public class AntRenderer {
 				   1f, 
 				   antAngle);
 		
-		if (ant.getFoodCarried() >= AntSimulatorConstants.MAX_FOOD_CARRIED) {
+		if (ant.getFoodCarried() >= AntSimulatorConstants.ANT_MAX_FOOD_CARRIED) {
 			batch.draw(AntSimulatorArt.payloadTexture, 
 					antPos.x - AntSimulatorArt.payloadTexture.getRegionWidth() / 2,
 					antPos.y - AntSimulatorArt.payloadTexture.getRegionHeight() / 2);
