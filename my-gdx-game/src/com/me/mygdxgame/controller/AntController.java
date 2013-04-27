@@ -246,13 +246,13 @@ public class AntController implements AntListener {
 	}
 
 	private void wrapPositionAroundWorld() {
-		if (ant.getPosition().x > world.getWidth()) {
+		if (ant.getPosition().x >= world.getWidth()) {
 			ant.getPosition().x -= world.getWidth();	
 		} else if (ant.getPosition().x < 0) {
 			ant.getPosition().x += world.getWidth();
 		}
 		
-		if (ant.getPosition().y > world.getHeight()) {
+		if (ant.getPosition().y >= world.getHeight()) {
 			ant.getPosition().y -= world.getHeight();	
 		} else if (ant.getPosition().y < 0) {
 			ant.getPosition().y += world.getHeight();

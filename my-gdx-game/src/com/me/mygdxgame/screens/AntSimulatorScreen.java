@@ -21,7 +21,7 @@ public class AntSimulatorScreen implements Screen {
 		world = new World();
 		renderer = new WorldRenderer(world);
 		controller = new Controller(world);
-		gestureListener = new AndroidGestureListener(controller, renderer);
+		gestureListener = new AndroidGestureListener(controller, world, renderer);
 		Gdx.input.setInputProcessor(new GestureDetector(gestureListener));
 	}
 

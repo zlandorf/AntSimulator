@@ -7,13 +7,17 @@ import com.badlogic.gdx.math.Vector2;
 import com.me.mygdxgame.art.AntSimulatorArt;
 import com.me.mygdxgame.constants.AntSimulatorConstants;
 import com.me.mygdxgame.model.Ant;
+import com.me.mygdxgame.model.World;
+import com.me.mygdxgame.util.Util;
 
 public class AntRenderer {
 	private static final float FRAME_DURATION = 0.1f;
     private Animation animation;
     private TextureRegion currentFrame;
+    private World world;
     
-	public AntRenderer() {
+	public AntRenderer(World world) {
+		this.world = world;
 		this.animation = new Animation(FRAME_DURATION, AntSimulatorArt.antTextureRegions);
 	}
 	
@@ -22,24 +26,12 @@ public class AntRenderer {
 		currentFrame = animation.getKeyFrame(antStateTime, true);
 		Vector2 antPos = ant.getPosition();
 		float antAngle = ant.getDirection().angle() - 90;
-		float antWidth = currentFrame.getRegionWidth();
-		float antHeight = currentFrame.getRegionHeight();
-
-		batch.draw(currentFrame, 
-				   antPos.x - antWidth / 2, 
-				   antPos.y - antHeight / 2, 
-				   antWidth / 2, 
-				   antHeight / 2, 
-				   antWidth, 
-				   antHeight, 
-				   1f, 
-				   1f, 
-				   antAngle);
+		
+		Util.redunduncyDrawing(currentFrame, batch, antPos, antAngle, world);
 		
 		if (ant.getFoodCarried() >= AntSimulatorConstants.ANT_MAX_FOOD_CARRIED) {
-			batch.draw(AntSimulatorArt.payloadTexture, 
-					antPos.x - AntSimulatorArt.payloadTexture.getRegionWidth() / 2,
-					antPos.y - AntSimulatorArt.payloadTexture.getRegionHeight() / 2);
+			TextureRegion payloadTex = AntSimulatorArt.payloadTexture;
+			Util.redunduncyDrawing(payloadTex, batch, antPos, 0, world);
 		}
 	}
 }

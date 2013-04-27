@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.me.mygdxgame.constants.AntSimulatorConstants;
 import com.me.mygdxgame.util.Util;
 
@@ -32,7 +31,7 @@ public class World {
 		worldBoundingBox = new Rectangle(0, 0, width, height);
 		ants = new ArrayList<Ant>();
 		foodSources = new ArrayList<FoodSource>();
-		nest = new Nest(new Vector2(width / 2, height / 2));//new Nest(Util.getRandomWorldPosition(width, height));
+		nest = new Nest(Util.getRandomWorldPosition(width, height));
 		addFoodSource();
 	}
 	

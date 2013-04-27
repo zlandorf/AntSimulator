@@ -4,12 +4,14 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.input.GestureDetector.GestureListener;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.me.mygdxgame.model.World;
 import com.me.mygdxgame.view.WorldRenderer;
 
 public class AndroidGestureListener implements GestureListener {
 	private static final float ZOOM_MAX = 2f;
 	private static final float ZOOM_MIN = 0.2f;
 	
+	private World world;
 	private WorldRenderer renderer;
 	private OrthographicCamera camera;
 	
@@ -17,7 +19,8 @@ public class AndroidGestureListener implements GestureListener {
 	
 	private float currentZoomLevel;
 	
-	public AndroidGestureListener(Controller controller, WorldRenderer renderer) {
+	public AndroidGestureListener(Controller controller, World world, WorldRenderer renderer) {
+		this.world = world;
 		this.controller = controller;
 		this.renderer = renderer;
 		this.camera = this.renderer.getCamera();
@@ -51,6 +54,18 @@ public class AndroidGestureListener implements GestureListener {
 	@Override
 	public boolean pan(float x, float y, float deltaX, float deltaY) {
 		camera.translate(currentZoomLevel * -deltaX, currentZoomLevel * deltaY);
+		if (camera.position.x < 0) {
+			camera.position.x += world.getWidth();
+		} else if (camera.position.x > world.getWidth()) {
+			camera.position.x -= world.getWidth();
+		}
+		
+		if (camera.position.y < 0) {
+			camera.position.y += world.getHeight();
+		} else if (camera.position.y > world.getHeight()) {
+			camera.position.y -= world.getHeight();
+		}
+		
 		camera.update();
 		return true;
 	}

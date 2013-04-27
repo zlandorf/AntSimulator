@@ -15,6 +15,7 @@ import com.me.mygdxgame.constants.AntSimulatorConstants;
 import com.me.mygdxgame.model.Ant;
 import com.me.mygdxgame.model.FoodSource;
 import com.me.mygdxgame.model.World;
+import com.me.mygdxgame.util.Util;
 
 public class WorldRenderer {
 
@@ -74,7 +75,7 @@ public class WorldRenderer {
 		fboBatch = new SpriteBatch();
 		textBatch = new SpriteBatch();
 		
-		antRenderer = new AntRenderer();
+		antRenderer = new AntRenderer(world);
 		debugRenderer = new DebugRenderer(world, fboCamera);
 		
 		font = new BitmapFont();
@@ -104,11 +105,38 @@ public class WorldRenderer {
 		
 		batch.setProjectionMatrix(camera.combined);
 		batch.begin();
+		
 		batch.draw(fboRegion,0,0);
-		batch.draw(fboRegion,0,world.getHeight());
+		// right part of the screen
+		if (camera.position.x >= world.getWidth() / 2) {
+			batch.draw(fboRegion,world.getWidth(),0);
+			
+			// top 
+			if (camera.position.y >= world.getHeight() / 2) {
+				batch.draw(fboRegion, 0, world.getHeight());
+				batch.draw(fboRegion, world.getWidth(), world.getHeight());
+			} else { // bottom
+				batch.draw(fboRegion, 0, -world.getHeight());
+				batch.draw(fboRegion, world.getWidth(), -world.getHeight());
+			}
+			
+		} else { // left part of the screen
+			batch.draw(fboRegion,-world.getWidth(),0);
+			
+			// top
+			if (camera.position.y >= world.getHeight() / 2) {
+				batch.draw(fboRegion, 0, world.getHeight());
+				batch.draw(fboRegion, - world.getWidth(), world.getHeight());
+			} else { // bottom
+				batch.draw(fboRegion, 0, -world.getHeight());
+				batch.draw(fboRegion, - world.getWidth(), -world.getHeight());
+			}
+		}
+		
+		
 		batch.end();
 		
-		
+		/* ---------------------------- text overlay ---------------------------- */
 		textBatch.begin();
 		
 		// draw overlay text
@@ -144,9 +172,7 @@ public class WorldRenderer {
 
 	private void drawNest() {
 		Vector2 nestPos = world.getNest().getPosition();
-		fboBatch.draw(AntSimulatorArt.nestTexture, 
-				   nestPos.x - AntSimulatorArt.nestTexture.getRegionWidth() / 2,
-				   nestPos.y - AntSimulatorArt.nestTexture.getRegionHeight() / 2);
+		Util.redunduncyDrawing(AntSimulatorArt.nestTexture, fboBatch, nestPos, 0, world);
 	}
 	
 	private void drawFood() {
@@ -167,14 +193,10 @@ public class WorldRenderer {
 				start = end;
 				end += step;
 			}
-			
-			TextureRegion frame = AntSimulatorArt.foodSourceTexture[index]; 
-			fboBatch.draw(frame,
-					   foodPos.x - frame.getRegionWidth() / 2,
-					   foodPos.y - frame.getRegionHeight() / 2);
+			Util.redunduncyDrawing(AntSimulatorArt.foodSourceTexture[index], fboBatch, foodPos, 0, world);
 		}
 	}
-
+	
 	public OrthographicCamera getCamera() {
 		return camera;
 	}
