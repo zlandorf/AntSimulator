@@ -23,8 +23,6 @@ public class DebugRenderer {
 	private SpriteBatch gameInfoTextBatch;
 	private BitmapFont gameInfoFont;
 
-
-	
 	private World world;
 	private OrthographicCamera fboCamera;
 	
