@@ -1,5 +1,7 @@
 package com.me.mygdxgame.view;
 
+import java.util.List;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -137,7 +139,6 @@ public class WorldRenderer {
 		batch.end();
 		
 		/* ---------------------------- text overlay ---------------------------- */
-		textBatch.begin();
 		
 		// draw overlay text
 		int nbAnts = world.getAnts().size();
@@ -146,11 +147,12 @@ public class WorldRenderer {
 		
 		float currentHeight = height - 10;
 		
-		font.draw(textBatch, "Nb Ants", 10, currentHeight);font.draw(textBatch, " : "+nbAnts, 60, currentHeight);
+		textBatch.begin();
+		font.draw(textBatch, "Nb Ants : ", 10, currentHeight);font.draw(textBatch, String.valueOf(nbAnts), 60, currentHeight);
 		currentHeight -= font.getLineHeight() + 5;
-		font.draw(textBatch, "Food", 10, currentHeight);font.draw(textBatch, " : "+food, 60, currentHeight);
+		font.draw(textBatch, "Food : ", 10, currentHeight);font.draw(textBatch, String.valueOf(food), 60, currentHeight);
 		currentHeight -= font.getLineHeight() + 5;
-		font.draw(textBatch, "Fps", 10, currentHeight);font.draw(textBatch, " : "+fps, 60, currentHeight);
+		font.draw(textBatch, "Fps : ", 10, currentHeight);font.draw(textBatch, String.valueOf(fps), 60, currentHeight);
 		textBatch.end();
 		
 		nbFrames++;
@@ -165,8 +167,9 @@ public class WorldRenderer {
 	}
 
 	private void drawAnts() {
-		for (Ant ant : world.getAnts()) {
-			antRenderer.render(fboBatch, ant);
+		List<Ant> ants = world.getAnts();
+		for (int i = 0; i < ants.size(); i++) {
+			antRenderer.render(fboBatch, ants.get(i));
 		}
 	}
 
@@ -176,7 +179,9 @@ public class WorldRenderer {
 	}
 	
 	private void drawFood() {
-		for (FoodSource source : world.getFoodSources()) {
+		List<FoodSource> foodSources = world.getFoodSources();
+		for (int i = 0; i < foodSources.size(); i++) {
+			FoodSource source = foodSources.get(i);
 			Vector2 foodPos = source.getPosition();
 			float foodLeft = source.getFoodLeft();
 			float maxFood = AntSimulatorConstants.INITIAL_FOOD_LEVEL;
@@ -186,9 +191,10 @@ public class WorldRenderer {
 			float end = step;
 			int index = 0;
 			
-			for (int i = 0; i < AntSimulatorArt.foodSourceTexture.length; i++) {
+			// Find the food texture that matches the amount of food eaten
+			for (int j = 0; j < AntSimulatorArt.foodSourceTexture.length; j++) {
 				if (start <= foodLeft && foodLeft < end) {
-					index = AntSimulatorArt.foodSourceTexture.length - 1 - i;
+					index = AntSimulatorArt.foodSourceTexture.length - 1 - j;
 				}
 				start = end;
 				end += step;

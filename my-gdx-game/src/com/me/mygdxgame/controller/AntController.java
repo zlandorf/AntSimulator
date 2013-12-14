@@ -18,6 +18,7 @@ public class AntController implements AntListener {
 	private Vector2 goal = null;
 	private Vector2 optimisedGoal = null;
 	private Vector2 tempVector = null;
+	private boolean hasGoal = false;
 	
 	private int currentTick;
 	private int nextDirectionChangeTick;
@@ -31,6 +32,10 @@ public class AntController implements AntListener {
 		this.tempVector = new Vector2();
 		this.communicationBus = communicationBus;
 		this.communicationBus.addListener(this);
+		
+		this.goal = new Vector2();
+		this.optimisedGoal = new Vector2();
+		this.hasGoal = false;
 	}
 	
 	@Override
@@ -64,7 +69,7 @@ public class AntController implements AntListener {
 			break;
 		}
 		
-		if (null != goal) {
+		if (hasGoal && null != goal) {
 			moveTowardsGoal();
 		}
 	}
@@ -141,8 +146,7 @@ public class AntController implements AntListener {
 			}	
 		}
 		
-		
-		if (null == goal || currentTick == nextDirectionChangeTick) {
+		if (!hasGoal || null == goal || currentTick == nextDirectionChangeTick) {
 			currentTick = 0;
 			setNewGoal(findRandomGoal());
 			nextDirectionChangeTick = (int) (Math.random() * AntSimulatorConstants.ANT_DIR_CHANGE_FREQUENCY);
@@ -192,7 +196,7 @@ public class AntController implements AntListener {
 	//--------------- COMMON METHODS
 	
 	private void findOptimisedGoal() {
-		optimisedGoal = new Vector2(goal);
+		optimisedGoal.set(goal.x, goal.y);
 		float antX = ant.getPosition().x;
 		float antY = ant.getPosition().y;
 		
@@ -262,13 +266,14 @@ public class AntController implements AntListener {
 	
 	private void setNewGoal(Vector2 newGoal) {
 		if (null == newGoal) {
-			this.goal = this.optimisedGoal = null;
+			hasGoal = false;
 			return;
+		} else {
+			hasGoal = true;
+			this.goal.set(newGoal);
+			ant.setGoal(goal);
+			findOptimisedGoal();
 		}
-		
-		this.goal = new Vector2(newGoal);
-		ant.setGoal(goal);
-		findOptimisedGoal();
 	}
 
 }

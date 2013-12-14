@@ -34,6 +34,7 @@ public class Controller {
 			time -= AntSimulatorConstants.FOOD_SPAWN_FREQUENCY;
 		}
 		
+		// Using iterator to remove the items
 		Iterator<FoodSource> foodIter = world.getFoodSources().iterator();
 		while (foodIter.hasNext()) {
 			FoodSource source = foodIter.next();
@@ -46,12 +47,13 @@ public class Controller {
 			world.addFoodSource();
 		}
 		
-		for (AntController antController : antControllers) {
-			antController.update(delta);
+		for (int i = 0; i < antControllers.size(); i++) {
+			antControllers.get(i).update(delta);
 		}
-		
-		for (Ant ant : world.getAnts()) {
-			ant.update(delta);
+
+		List<Ant> ants = world.getAnts();
+		for (int i = 0; i < ants.size(); i++) {
+			ants.get(i).update(delta);
 		}
 		
 		while (world.getNest().getFoodStock() >= AntSimulatorConstants.ANT_FOOD_COST) {
