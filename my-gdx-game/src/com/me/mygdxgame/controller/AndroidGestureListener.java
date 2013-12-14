@@ -17,18 +17,19 @@ public class AndroidGestureListener implements GestureListener {
 	
 	private Controller controller;
 	
-	private float currentZoomLevel;
+	private float initialZoomScale;
 	
 	public AndroidGestureListener(Controller controller, World world, WorldRenderer renderer) {
 		this.world = world;
 		this.controller = controller;
 		this.renderer = renderer;
 		this.camera = this.renderer.getCamera();
-		currentZoomLevel = camera.zoom;
+		initialZoomScale = camera.zoom;
 	}
 
 	@Override
 	public boolean touchDown(float x, float y, int pointer, int button) {
+		initialZoomScale = camera.zoom;
 		return false;
 	}
 
@@ -53,7 +54,7 @@ public class AndroidGestureListener implements GestureListener {
 
 	@Override
 	public boolean pan(float x, float y, float deltaX, float deltaY) {
-		camera.translate(currentZoomLevel * -deltaX, currentZoomLevel * deltaY);
+		camera.translate(initialZoomScale * -deltaX, initialZoomScale * deltaY);
 		if (camera.position.x < 0) {
 			camera.position.x += world.getWidth();
 		} else if (camera.position.x > world.getWidth()) {
@@ -72,14 +73,14 @@ public class AndroidGestureListener implements GestureListener {
 
 	@Override
 	public boolean zoom(float initialDistance, float distance) {
-		float delta = initialDistance - distance;
-		delta *= 0.00001f;
-		
-		currentZoomLevel += delta;
-		currentZoomLevel = Math.min(Math.max(ZOOM_MIN, currentZoomLevel), ZOOM_MAX); 
-		camera.zoom = currentZoomLevel;
-		camera.update();
-		return true;
+		if (distance != 0) {
+			float ratio = initialDistance / distance;
+			float zoomScale = initialZoomScale * ratio;
+			camera.zoom = Math.min(Math.max(ZOOM_MIN, zoomScale), ZOOM_MAX);
+			camera.update();
+			return true;	
+		}
+		return false;
 	}
 
 	@Override
