@@ -3,11 +3,9 @@ package com.me.mygdxgame.view;
 import java.util.List;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap.Format;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
@@ -27,8 +25,6 @@ public class WorldRenderer {
 	
 	private SpriteBatch fboBatch;
 	private SpriteBatch batch;
-	private SpriteBatch textBatch;
-	private BitmapFont font;
 	
 	private AntRenderer antRenderer = null;
 	private DebugRenderer debugRenderer = null;
@@ -37,10 +33,6 @@ public class WorldRenderer {
 	
 	private float width;
 	private float height;
-	
-	private float accumTime = 0;
-	private int nbFrames = 0;
-	private int currentFps = 0;
 	
 	private boolean debug;
 	
@@ -72,16 +64,11 @@ public class WorldRenderer {
 		fboCamera.position.y = world.getHeight() / 2;
 		fboCamera.update();
 		
-		
 		batch = new SpriteBatch();
 		fboBatch = new SpriteBatch();
-		textBatch = new SpriteBatch();
 		
 		antRenderer = new AntRenderer(world);
 		debugRenderer = new DebugRenderer(world, fboCamera);
-		
-		font = new BitmapFont();
-		font.setColor(Color.BLACK);
 		
 		fbo = new FrameBuffer(Format.RGB565, (int)world.getWidth(), (int) world.getHeight(), false);
 		fboRegion = new TextureRegion(fbo.getColorBufferTexture());
@@ -135,35 +122,11 @@ public class WorldRenderer {
 			}
 		}
 		
-		
 		batch.end();
 		
-		/* ---------------------------- text overlay ---------------------------- */
-		
-		// draw overlay text
-		int nbAnts = world.getAnts().size();
-		int food   = (int)world.getNest().getFoodStock();
-		int fps    = currentFps;
-		
-		float currentHeight = height - 10;
-		
-		textBatch.begin();
-		font.draw(textBatch, "Nb Ants : ", 10, currentHeight);font.draw(textBatch, String.valueOf(nbAnts), 60, currentHeight);
-		currentHeight -= font.getLineHeight() + 5;
-		font.draw(textBatch, "Food : ", 10, currentHeight);font.draw(textBatch, String.valueOf(food), 60, currentHeight);
-		currentHeight -= font.getLineHeight() + 5;
-		font.draw(textBatch, "Fps : ", 10, currentHeight);font.draw(textBatch, String.valueOf(fps), 60, currentHeight);
-		textBatch.end();
-		
-		nbFrames++;
-		accumTime += delta;
-		
-		if (accumTime > 1.0f) {
-			currentFps = (int) (nbFrames / accumTime);
-			accumTime -= 1.0f;
-			nbFrames = 0;
+		if (debug) {
+			debugRenderer.renderGameInfo(delta);
 		}
-		
 	}
 
 	private void drawAnts() {
