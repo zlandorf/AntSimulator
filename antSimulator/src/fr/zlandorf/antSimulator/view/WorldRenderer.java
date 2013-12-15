@@ -74,6 +74,8 @@ public class WorldRenderer {
 		fbo = new FrameBuffer(Format.RGB565, (int)world.getWidth(), (int) world.getHeight(), false);
 		fboRegion = new TextureRegion(fbo.getColorBufferTexture());
 		fboRegion.flip(false,  true);
+		camera.zoom = 2.0f;
+		camera.update();
 	}
 	
 	public void render(float delta) {

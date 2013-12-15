@@ -10,7 +10,7 @@ public class AntSimulatorDesktop {
 		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 		cfg.title = "Ant Simulator";
 		cfg.useGL20 = true;
-		cfg.width = 1000;
+		cfg.width = 1500;
 		cfg.height = 800;
 		
 		new LwjglApplication(new AntSimulator(), cfg);

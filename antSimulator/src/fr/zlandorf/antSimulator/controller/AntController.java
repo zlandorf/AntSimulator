@@ -197,7 +197,8 @@ public class AntController implements AntListener {
 	//--------------- COMMON METHODS
 	
 	private void findOptimisedGoal() {
-		optimisedGoal.set(goal.x, goal.y);
+		optimisedGoal.set(goal);
+		
 		float antX = ant.getPosition().x;
 		float antY = ant.getPosition().y;
 		
@@ -221,27 +222,20 @@ public class AntController implements AntListener {
 	}
 	
 	private void moveTowardsGoal() {
+		findOptimisedGoal();
 		Vector2 antPos = ant.getPosition();
-		float distToGoal = antPos.dst(goal);
-		float distToOptimisedGoal = antPos.dst(optimisedGoal);
 
-		Vector2 closest;
-		if (distToGoal <= distToOptimisedGoal) {
-			closest = goal;
-		} else {
-			closest = optimisedGoal;
-		}
-		float distanceToGoal = antPos.dst(closest); 
-		tempVector.set(closest.x, closest.y);
+		float distToOptimisedGoal = antPos.dst(optimisedGoal); 
+		tempVector.set(optimisedGoal.x, optimisedGoal.y);
 		
 		//set ant direction
 		Vector2 dir = tempVector.sub(antPos);
 		dir.nor();
 		ant.setDirection(dir);
 		
-		if (distanceToGoal <= AntSimulatorConstants.ANT_SPEED) {
-			ant.setPosition(closest.x, closest.y);
-			onArrival(closest);
+		if (distToOptimisedGoal <= AntSimulatorConstants.ANT_SPEED) {
+			ant.setPosition(optimisedGoal.x, optimisedGoal.y);
+			onArrival(optimisedGoal);
 		} else {
 			float newX = antPos.x + ant.getDirection().x * AntSimulatorConstants.ANT_SPEED; 
 			float newY = antPos.y + ant.getDirection().y * AntSimulatorConstants.ANT_SPEED;
