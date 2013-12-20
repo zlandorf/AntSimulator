@@ -29,6 +29,8 @@ public class AntSimulatorArt {
 		int width = texture.getWidth() / nbSlices;
 		int height = texture.getHeight();
 		
+		
+		
 		for (int i = 0; i < nbSlices; i++) {
 			foodSourceTexture[i] = new TextureRegion(texture, i * width, 0, width, height);
 		}
