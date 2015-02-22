@@ -7,23 +7,29 @@ import com.badlogic.gdx.input.GestureDetector;
 
 import fr.zlandorf.antSimulator.controller.AndroidGestureListener;
 import fr.zlandorf.antSimulator.controller.Controller;
+import fr.zlandorf.antSimulator.core.Engine;
 import fr.zlandorf.antSimulator.model.World;
 import fr.zlandorf.antSimulator.view.WorldRenderer;
 
 public class AntSimulatorScreen implements Screen {
 
+	
 	private World world;
 	private WorldRenderer renderer;
 	private Controller controller;
 	private AndroidGestureListener gestureListener;
 	
+	private Engine engine;
+	
 	@Override
 	public void show() {
+		
 		world = new World();
 		renderer = new WorldRenderer(world);
 		controller = new Controller(world);
 		gestureListener = new AndroidGestureListener(controller, world, renderer);
 		Gdx.input.setInputProcessor(new GestureDetector(gestureListener));
+		engine = new Engine();
 	}
 
 
