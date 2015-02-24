@@ -7,6 +7,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Rectangle;
 
 import fr.zlandorf.antSimulator.constants.AntSimulatorConstants;
+import fr.zlandorf.antSimulator.core.Engine;
 import fr.zlandorf.antSimulator.util.Util;
 
 public class World {
@@ -19,8 +20,12 @@ public class World {
 	
 	private Nest nest;
 	private Rectangle worldBoundingBox;
+	
+	private Engine engine;
 
-	public World() {
+	public World(Engine engine) {
+		this.engine = engine;
+		
 		width = Gdx.graphics.getWidth() * AntSimulatorConstants.SIZE_FACTOR;
 		height = Gdx.graphics.getHeight() * AntSimulatorConstants.SIZE_FACTOR;
 		if (width < height) {
@@ -42,6 +47,7 @@ public class World {
 	
 	public void addAnt(Ant ant) {
 		ants.add(ant);
+		engine.addEntity(new fr.zlandorf.antSimulator.entities.Ant(ant.getPosition().x, ant.getPosition().y));
 	}
 	
 

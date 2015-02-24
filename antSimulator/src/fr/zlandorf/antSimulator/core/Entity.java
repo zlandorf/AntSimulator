@@ -3,7 +3,6 @@ package fr.zlandorf.antSimulator.core;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class Entity {
 	long id;
 	private Map<Class<? extends Component>, Component> components;
@@ -20,10 +19,14 @@ public class Entity {
 		this.components.put(component.getClass(), component);
 	}
 	
-	public Component getComponent(Class<? extends Component> component) {
-		if (components.containsKey(component)) {
-			return components.get(component);
+	public <T extends Component> T getComponent(Class<T> componentClass) {
+		if (components.containsKey(componentClass)) {
+			return (T)components.get(componentClass);
 		}
 		return null;
+	}
+
+	public Long getId() {
+		return id;
 	}
 }

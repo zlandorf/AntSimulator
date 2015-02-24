@@ -15,13 +15,41 @@ public class Engine {
 	public Engine() {
 		this.entities = new ArrayList<Entity>();
 		this.entitiesById = new HashMap<Long, Entity>();
+		this.systems = new ArrayList<EntitySystem>();
 	}
 	
 	public void addEntity(Entity entity) {
 		long entityId = currentId++;
 		entity.setId(entityId);
 		entities.add(entity);
-		entitiesById.put(entityId, entity);
+		entitiesById.put(entity.getId(), entity);
+	}
+	
+	public List<Entity> getEntities() {
+		return entities;
+	}
+	
+	public Entity getEntity(long id) {
+		return entitiesById.get(id);
+	}
+	
+	public List<Entity> getEntitiesFor(Class<? extends Component>... components) {
+		System.out.println("Get entities for : "+components);
+		List<Entity> ents = new ArrayList<Entity>();
+		for (Entity entity : entities) {
+			boolean matches = true;
+			for (Class<? extends Component> component : components) {
+				if (entity.getComponent(component) == null) {
+					matches = false;
+					break;
+				}
+			}
+			
+			if (matches) {
+				ents.add(entity);
+			}
+		}
+		return ents;
 	}
 	
 	public void addSystem(EntitySystem system) {

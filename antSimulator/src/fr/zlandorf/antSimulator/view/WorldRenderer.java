@@ -25,7 +25,7 @@ public class WorldRenderer {
 	private OrthographicCamera fboCamera;
 	
 	private SpriteBatch fboBatch;
-	private SpriteBatch batch;
+	public SpriteBatch batch;
 	
 	private AntRenderer antRenderer = null;
 	private DebugRenderer debugRenderer = null;
